@@ -13,5 +13,10 @@ clean:
 dist:
 	sudo python setup.py sdist --formats=gztar,zip
 
+db:
+	dropdb taxcli
+	createdb taxcli
+	./scripts/init_db.py
+
 upload: clean dist
 	twine upload dist/*

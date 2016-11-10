@@ -12,6 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.types import (
     Date,
     Enum,
+    Float,
     Integer,
     LargeBinary,
     String,
@@ -34,6 +35,7 @@ class Invoice(base):
 
     invoice_number = Column(String(100), nullable=False)
     contact_alias = Column(String(40), nullable=False)
+    amount = Column(Float(return_scale=2))
     sales_tax = Column(Integer, server_default='19')
     afa = Column(Integer)
     date = Column(Date, nullable=False)
@@ -41,14 +43,15 @@ class Invoice(base):
     invoice_file = Column(LargeBinary)
     invoice_file_type = Column(String(10))
 
-    def __init__(self, invoice_number, contact_alias, date, sales_tax=19,
-                 afa=None, invoce_type='expense', invoice_path=None):
+    def __init__(self, invoice_number, contact_alias, amount, date,
+                 sales_tax=19, afa=None, invoice_type='expense', invoice_path=None):
         self.invoice_number = invoice_number
         self.contact_alias = contact_alias
+        self.amount = amount
         self.date = date
         self.sales_tax = sales_tax
         self.afa = afa
-        if 'expense':
+        if invoice_type == 'expense':
             self.invoice_type = InvoiceTypes.expense
         else:
             self.invoice_type = InvoiceTypes.income
