@@ -72,7 +72,7 @@ def get_invoice_data(args):
             print('Invalid invoice type')
             invoice_type = None
 
-    while not sales_tax:
+    while sales_tax is None:
         sales_tax = input("Sales tax [19]:")
         sales_tax = 19 if sales_tax == '' else sales_tax
         try:
@@ -80,7 +80,7 @@ def get_invoice_data(args):
         except:
             print("Enter a valid number")
             sales_tax = None
-        if sales_tax not in [7, 19]:
+        if sales_tax not in [0, 7, 19]:
             print("Sales tax has to be 7 or 19 percent")
 
     while afa is None:
