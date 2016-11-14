@@ -11,7 +11,8 @@ setup(
     license='MIT',
     install_requires=[
         'sqlalchemy>=1.1.3',
-        'terminaltables>=2.1.0'
+        'terminaltables>=2.1.0',
+        'psycopg2>=2.6.2'
     ],
     classifiers=[
         'License :: OSI Approved :: MIT License',
