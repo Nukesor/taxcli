@@ -1,4 +1,3 @@
-import os
 import enum
 from taxcli import base
 
@@ -45,7 +44,8 @@ class Invoice(base):
     invoice_file_type = Column(String(10))
 
     def __init__(self, invoice_number, contact_alias, amount, date,
-                 sales_tax=19, afa=None, invoice_type='expense', invoice_path=None):
+                 sales_tax=19, afa=None, invoice_type='expense',
+                 invoice_file=None, invoice_extension=None):
         self.invoice_number = invoice_number
         self.contact_alias = contact_alias
         self.amount = amount
@@ -56,9 +56,5 @@ class Invoice(base):
             self.invoice_type = InvoiceTypes.expense
         else:
             self.invoice_type = InvoiceTypes.income
-        if invoice_path:
-            with open(invoice_path, "rb") as file_descriptor:
-                _, extension = os.path.splitext(invoice_path)
-                data = file_descriptor.read()
-                self.invoice_file = data
-                self.invoice_file_type = extension
+        self.invoice_file = invoice_file
+        self.invoice_file_type = invoice_extension

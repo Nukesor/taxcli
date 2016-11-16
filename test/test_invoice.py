@@ -1,3 +1,5 @@
+import os
+
 from taxcli.models.invoice import InvoiceTypes
 from taxcli.models import (
     Invoice
@@ -23,10 +25,16 @@ class TestInvoiceAnalysis:
         assert invoice.invoice_file_type is None
 
     def test_invoice_factory(self, session, invoice_factory):
+        invoice_path = os.path.join('test', 'media', 'test.pdf')
+        with open(invoice_path, 'rb') as pdf_file:
+            _, extension = os.path.splitext(invoice_path)
+            invoice_file = pdf_file.read()
+            invoice_file_type = extension
+
         invoice_factory.get(invoice_number='2016-2', contact_alias='test',
                             amount='10000', date='2016-05-05',
-                            sales_tax=7, afa=0,
-                            invoice_type='income', invoice_path=None)
+                            sales_tax=7, afa=0, invoice_type='income',
+                            invoice_file=invoice_file, invoice_extension=invoice_file_type)
         invoice = session.query(Invoice) \
             .filter(Invoice.contact_alias == 'test') \
             .one()

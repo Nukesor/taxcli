@@ -13,8 +13,13 @@ def get_invoice_data(args):
             print('Invalid file or file path')
             sys.exit(1)
         invoice_path = args['file']
+        with open(invoice_path, "rb") as file_descriptor:
+            _, extension = os.path.splitext(invoice_path)
+            invoice_file = file_descriptor.read()
+            invoice_file_type = extension
     else:
-        invoice_path = None
+        invoice_file = None
+        invoice_file_type = None
 
     alias = None
     invoice_number = None
@@ -95,7 +100,7 @@ def get_invoice_data(args):
 
     new_invoice = Invoice(invoice_number, alias, amount, date,
                           sales_tax=sales_tax, afa=afa, invoice_type=invoice_type,
-                          invoice_path=invoice_path)
+                          invoice_file=invoice_file, invoice_extension=invoice_file_type)
 
     session.add(new_invoice)
     session.commit()

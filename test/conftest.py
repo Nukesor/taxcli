@@ -40,7 +40,6 @@ def session(request, dbtransaction, monkeypatch):
     def teardown():
         # Explicitly remove the session so that we'll get a new session every time we go here.
         session.close()
-
     request.addfinalizer(teardown)
 
     return session
@@ -52,12 +51,13 @@ def invoice_factory(session, contact):
     class InvoiceFactory():
         def get(self, invoice_number='2016-1', contact_alias='test',
                 amount='5000', date='2016-03-05',
-                sales_tax=19, afa=None,
-                invoice_type='expense', invoice_path=None):
+                sales_tax=19, afa=None, invoice_type='expense',
+                invoice_file=None, invoice_extension=None):
             """Return an Invoice."""
             invoice = Invoice(
                 invoice_number, contact_alias, amount, date,
-                sales_tax, afa, invoice_type, invoice_path)
+                sales_tax, afa, invoice_type,
+                invoice_file=invoice_file, invoice_extension=invoice_extension)
             session.add(invoice)
             session.commit()
             return invoice
