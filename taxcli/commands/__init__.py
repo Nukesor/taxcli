@@ -2,6 +2,7 @@ from taxcli.commands.transaction import get_transaction_data
 from taxcli.commands.contact import get_contact_data
 from taxcli.commands.invoice import (
     get_invoice_data,
+    add_invoice_file,
     delete_invoice_data,
     list_invoice_data,
 )
@@ -12,6 +13,8 @@ def add(args):
         get_transaction_data()
     elif args['type'] == 'invoice':
         get_invoice_data(args)
+    elif args['type'] == 'file':
+        add_invoice_file(args)
     elif args['type'] == 'contact':
         get_contact_data()
 

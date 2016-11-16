@@ -2,6 +2,7 @@ from sqlalchemy import extract
 from taxcli.models import Invoice
 from taxcli.helper.postgres import get_session
 from taxcli.helper.output import print_invoices
+from taxcli.helper.invoice_files import get_invoice_files
 from taxcli.helper.calculation import (
     calculate_afa,
     calculate_amount,
@@ -24,6 +25,7 @@ def get_month(args):
         .all()
 
     refund_tax = calculate_tax(expenses)
+    get_invoice_files(expenses)
 
     print('Expenses: \n')
     print_invoices(expenses)
@@ -38,6 +40,7 @@ def get_month(args):
 
     received_tax = calculate_tax(incomes)
     income_amount = calculate_amount(incomes)
+    get_invoice_files(incomes)
 
     print('Incomes: \n')
     print_invoices(incomes)
@@ -62,6 +65,7 @@ def get_year(args):
     # Ust.VA + overall expense calculation
     refund_tax = calculate_tax(expenses)
     expense_amount = calculate_amount(expenses)
+    get_invoice_files(expenses)
 
     print('Expenses:')
     print_invoices(expenses)
@@ -75,9 +79,10 @@ def get_year(args):
         .all()
 
     afa = calculate_afa(afa_invoices, year)
+    get_invoice_files(afa_invoices)
 
     print('\nAfA invoices:')
-    print_invoices(expenses)
+    print_invoices(afa_invoices)
 
     # Income and Ust. VA income calculation
     incomes = session.query(Invoice) \
@@ -88,6 +93,7 @@ def get_year(args):
 
     received_tax = calculate_tax(incomes)
     income_amount = calculate_amount(incomes)
+    get_invoice_files(incomes)
 
     print('\nIncomes:')
     print_invoices(incomes)

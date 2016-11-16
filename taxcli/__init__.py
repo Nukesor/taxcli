@@ -25,7 +25,7 @@ def main():
         title='Subcommands', description='Add data or get an analysis')
 
     # Add
-    add_types = ['transaction', 'invoice', 'contact']
+    add_types = ['transaction', 'invoice', 'contact', 'file']
     add_subcommand = subparsers.add_parser(
         'add', help='Add data to the database')
     add_subcommand.add_argument(

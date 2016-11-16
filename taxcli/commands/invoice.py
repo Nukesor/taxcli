@@ -17,7 +17,7 @@ def get_invoice_data(args):
         with open(invoice_path, "rb") as file_descriptor:
             _, extension = os.path.splitext(invoice_path)
             invoice_file = file_descriptor.read()
-            invoice_file_type = extension
+            invoice_file_type = extension[1:]
     else:
         invoice_file = None
         invoice_file_type = None
@@ -199,3 +199,55 @@ def list_invoice_data(args):
             else:
                 done = True
     print_invoices(invoices)
+
+
+def add_invoice_file(args):
+    session = get_session()
+
+    if not os.path.isfile(args['file']):
+        print('Invalid file or file path')
+        sys.exit(1)
+    invoice_path = args['file']
+    with open(invoice_path, "rb") as file_descriptor:
+        _, extension = os.path.splitext(invoice_path)
+        invoice_file = file_descriptor.read()
+        invoice_file_type = extension[1:]
+
+    alias = None
+    invoice_number = None
+
+    while not alias:
+        alias = input('Alias for the invoices ("help" for a list):')
+        if alias == 'help':
+            contacts = session.query(Contact).all()
+            for contact in contacts:
+                print(contact.alias)
+            alias = None
+        else:
+            exists = session.query(Contact).get(alias)
+            if not exists:
+                print("Alias doesn't exists.")
+                alias = None
+
+    while not invoice_number:
+        invoice_number = input('Invoice number for this alias("help" for a list):')
+        if invoice_number == 'help':
+            invoices = session.query(Invoice) \
+                .filter(Invoice.contact_alias == alias) \
+                .all()
+            for invoice in invoices:
+                print(invoice.invoice_number)
+            invoice_number = None
+        else:
+            invoice = session.query(Invoice) \
+                .filter(Invoice.contact_alias == alias) \
+                .filter(Invoice.invoice_number == invoice_number) \
+                .one_or_none()
+            if not invoice:
+                print("Alias doesn't exists.")
+                alias = None
+
+    invoice.invoice_file = invoice_file
+    invoice.invoice_file_type = invoice_file_type
+    session.add(invoice)
+    session.commit()
