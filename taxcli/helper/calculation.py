@@ -10,9 +10,6 @@ def calculate_afa(invoices, year):
             # Start year of the invoice
             if invoice.date.year == year:
                 month_amount = invoice.amount/invoice.afa/12
-                print(invoice.amount)
-                print(invoice.afa)
-                print(month_amount)
                 afa += (12-invoice.date.month+1)*month_amount
             # End year of the invoice
             elif invoice.date.year == (year - invoice.afa):
