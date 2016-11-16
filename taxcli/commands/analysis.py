@@ -5,7 +5,7 @@ from taxcli.helper.output import print_invoices
 from taxcli.helper.invoice_files import get_invoice_files
 from taxcli.helper.calculation import (
     calculate_afa,
-    calculate_amount,
+    calculate_netto_amount,
     calculate_tax,
 )
 
@@ -39,7 +39,7 @@ def get_month(args):
         .all()
 
     received_tax = calculate_tax(incomes)
-    income_amount = calculate_amount(incomes)
+    income_amount = calculate_netto_amount(incomes)
     get_invoice_files(incomes)
 
     print('Incomes: \n')
@@ -64,7 +64,7 @@ def get_year(args):
 
     # Ust.VA + overall expense calculation
     refund_tax = calculate_tax(expenses)
-    expense_amount = calculate_amount(expenses)
+    expense_amount = calculate_netto_amount(expenses)
     get_invoice_files(expenses)
 
     print('Expenses:')
@@ -92,7 +92,7 @@ def get_year(args):
         .all()
 
     received_tax = calculate_tax(incomes)
-    income_amount = calculate_amount(incomes)
+    income_amount = calculate_netto_amount(incomes)
     get_invoice_files(incomes)
 
     print('\nIncomes:')

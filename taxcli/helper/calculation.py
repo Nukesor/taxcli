@@ -21,11 +21,11 @@ def calculate_afa(invoices, year):
     return afa
 
 
-def calculate_amount(invoices):
+def calculate_netto_amount(invoices):
     amount = 0
     for invoice in invoices:
         if not invoice.afa:
-            amount += invoice.amount
+            amount += invoice.amount * ((100-invoice.sales_tax)/100)
     return amount
 
 

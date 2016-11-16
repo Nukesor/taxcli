@@ -4,7 +4,7 @@ from taxcli.models import (
 )
 
 from taxcli.helper.calculation import (
-    calculate_amount,
+    calculate_netto_amount,
     calculate_tax,
     calculate_afa,
 )
@@ -135,10 +135,10 @@ class TestInvoiceCalculation:
             .filter(Invoice.contact_alias == 'test') \
             .all()
 
-        amount = calculate_amount(invoices)
-        assert amount == 10400
+        amount = calculate_netto_amount(invoices)
+        assert amount == 8424
 
-    def test_dont_calculate_amount_with_afa(self, session, invoice_factory):
+    def test_dont_calculate_netto_amount_with_afa(self, session, invoice_factory):
         invoice_factory.get(
             invoice_number='2016-1',
             amount=7200,
@@ -154,5 +154,5 @@ class TestInvoiceCalculation:
             .filter(Invoice.contact_alias == 'test') \
             .all()
 
-        amount = calculate_amount(invoices)
-        assert amount == 7200
+        amount = calculate_netto_amount(invoices)
+        assert amount == 5832
