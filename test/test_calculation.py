@@ -5,7 +5,8 @@ from taxcli.models import (
 
 
 class TestInvoiceAnalysis:
-    def test_invoice_creation(self, session, contact, invoice_factory):
+    def test_invoice_creation(self, session, invoice_factory):
+        invoice_factory.get()
         invoice = session.query(Invoice) \
             .filter(Invoice.contact_alias == 'test') \
             .one()

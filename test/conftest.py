@@ -24,7 +24,6 @@ def dbtransaction(request):
 
     def teardown():
         # Explicitly remove the session so that we'll get a new session every time we go here.
-
         transaction.rollback()
         connection.close()
 
@@ -38,11 +37,17 @@ def session(request, dbtransaction, monkeypatch):
     session = get_session(connection=dbtransaction)
     monkeypatch.setattr(taxcli.helper.postgres, 'get_session', lambda *args: session)
 
+    def teardown():
+        # Explicitly remove the session so that we'll get a new session every time we go here.
+        session.close()
+
+    request.addfinalizer(teardown)
+
     return session
 
 
-@pytest.fixture()
-def invoice_factory(session):
+@pytest.fixture(scope='function')
+def invoice_factory(session, contact):
     """Returns a class for generating Invoices."""
     class InvoiceFactory():
         def get(self, invoice_number='2016-1', contact_alias='test',
@@ -52,7 +57,7 @@ def invoice_factory(session):
             """Return an Invoice."""
             invoice = Invoice(
                 invoice_number, contact_alias, amount, date,
-                sales_tax=19, afa=None, invoice_type='expense', invoice_path=None)
+                sales_tax, afa, invoice_type, invoice_path)
             session.add(invoice)
             session.commit()
             return invoice
@@ -62,8 +67,8 @@ def invoice_factory(session):
 @pytest.fixture(scope='function')
 def contact_factory(session):
     """Returns a class for generating Invoices."""
-    class InvoiceFactory():
-        def get(self, alias='Test', name='Test Inc.',
+    class ContactFactory():
+        def get(self, alias='test', name='Test Inc.',
                 addressline1='Teststr. 60',
                 addressline2=None,
                 addressline3=None,
@@ -77,10 +82,10 @@ def contact_factory(session):
             session.add(contact)
             session.commit()
             return contact
-    return Contact()
+    return ContactFactory()
 
 
 @pytest.fixture(scope='function')
-def contact(session, invoice_factory):
+def contact(session, contact_factory):
     """Returns a default test contact."""
-    invoice_factory.get()
+    contact_factory.get()
