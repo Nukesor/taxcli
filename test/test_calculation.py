@@ -1,23 +1,47 @@
-from taxcli.models.invoice import InvoiceTypes
+import pytest
 from taxcli.models import (
     Invoice
 )
 
+from taxcli.helper.calculation import (
+    calculate_tax,
+)
 
-class TestInvoiceAnalysis:
-    def test_invoice_creation(self, session, invoice_factory):
-        invoice_factory.get()
+
+class TestInvoiceCalculation:
+    @pytest.mark.parametrize('tax, result', [(7, 140), (19, 380)])
+    def test_tax_calculation_19(self, session, invoice_factory, tax, result):
+        invoice_factory.get(
+            amount=2000,
+            sales_tax=tax,
+        )
         invoice = session.query(Invoice) \
             .filter(Invoice.contact_alias == 'test') \
+            .filter(Invoice.invoice_number == '2016-1') \
             .one()
-        assert invoice.invoice_number == '2016-1'
-        assert invoice.contact_alias == 'test'
-        assert invoice.amount == 5000
-        assert invoice.sales_tax == 19
-        assert invoice.afa is None
-        assert invoice.invoice_type == InvoiceTypes.expense
-        assert invoice.date.day == 5
-        assert invoice.date.month == 3
-        assert invoice.date.year == 2016
-        assert invoice.invoice_file is None
-        assert invoice.invoice_file_type is None
+
+        tax = calculate_tax([invoice])
+        assert tax == result
+
+    def test_tax_calculation(self, session, invoice_factory):
+        invoice_factory.get(
+            invoice_number='2016-1',
+            amount=2000,
+            sales_tax=19,
+        )
+        invoice_factory.get(
+            invoice_number='2016-2',
+            amount=2000,
+            sales_tax=7,
+        )
+        invoice_factory.get(
+            invoice_number='2016-3',
+            amount=8000,
+            sales_tax=7,
+        )
+        invoice = session.query(Invoice) \
+            .filter(Invoice.contact_alias == 'test') \
+            .all()
+
+        tax = calculate_tax(invoice)
+        assert tax == 1080
