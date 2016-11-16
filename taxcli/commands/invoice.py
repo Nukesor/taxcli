@@ -149,47 +149,6 @@ def delete_invoice_data(args):
     session.commit()
 
 
-def delete_invoice_data(args):
-    session = get_session()
-
-    alias = None
-    invoice_number = None
-
-    while not alias:
-        alias = input('Alias for this invoice ("help" for a list):')
-        if alias == 'help':
-            contacts = session.query(Contact).all()
-            for contact in contacts:
-                print(contact.alias)
-            alias = None
-        else:
-            exists = session.query(Contact).get(alias)
-            if not exists:
-                print("Alias doesn't exists.")
-                alias = None
-
-    while not invoice_number:
-        invoice_number = input('Invoice number for this alias("help" for a list):')
-        if invoice_number == 'help':
-            invoices = session.query(Invoice) \
-                .filter(Invoice.contact_alias == alias) \
-                .all()
-            for invoice in invoices:
-                print(invoice.invoice_number)
-            invoice_number = None
-        else:
-            invoice = session.query(Invoice) \
-                .filter(Invoice.contact_alias == alias) \
-                .filter(Invoice.invoice_number == invoice_number) \
-                .one_or_none()
-            if not invoice:
-                print("Alias doesn't exists.")
-                alias = None
-
-    session.delete(invoice)
-    session.commit()
-
-
 def list_invoice_data(args):
     session = get_session()
 
@@ -229,6 +188,7 @@ def list_invoice_data(args):
             else:
                 invoices = session.query(Invoice) \
                     .filter(Invoice.contact_alias == alias) \
+                    .order_by(Invoice.date.asc()) \
                     .all()
             if not invoices:
                 if invoice_number:

@@ -20,7 +20,7 @@ def get_month(args):
         .filter(extract('month', Invoice.date) == month) \
         .filter(extract('year', Invoice.date) == year) \
         .filter(Invoice.invoice_type == 'expense') \
-        .order_by(Invoice.date.desc()) \
+        .order_by(Invoice.date.asc()) \
         .all()
 
     refund_tax = calculate_tax(expenses)
@@ -33,7 +33,7 @@ def get_month(args):
         .filter(extract('month', Invoice.date) == month) \
         .filter(extract('year', Invoice.date) == year) \
         .filter(Invoice.invoice_type == 'income') \
-        .order_by(Invoice.date.desc()) \
+        .order_by(Invoice.date.asc()) \
         .all()
 
     received_tax = calculate_tax(incomes)
@@ -56,7 +56,7 @@ def get_year(args):
     expenses = session.query(Invoice) \
         .filter(extract('year', Invoice.date) == year) \
         .filter(Invoice.invoice_type == 'expense') \
-        .order_by(Invoice.date.desc()) \
+        .order_by(Invoice.date.asc()) \
         .all()
 
     # Ust.VA + overall expense calculation
@@ -71,7 +71,7 @@ def get_year(args):
         .filter(Invoice.afa != None) \
         .filter(Invoice.invoice_type == 'expense') \
         .filter(extract('year', Invoice.date) >= (year-Invoice.afa)) \
-        .order_by(Invoice.date.desc()) \
+        .order_by(Invoice.date.asc()) \
         .all()
 
     afa = calculate_afa(afa_invoices, year)
@@ -83,7 +83,7 @@ def get_year(args):
     incomes = session.query(Invoice) \
         .filter(extract('year', Invoice.date) == year) \
         .filter(Invoice.invoice_type == 'income') \
-        .order_by(Invoice.date.desc()) \
+        .order_by(Invoice.date.asc()) \
         .all()
 
     received_tax = calculate_tax(incomes)
