@@ -9,6 +9,7 @@ from sqlalchemy import (
 )
 
 from sqlalchemy.types import (
+    Boolean,
     Date,
     Enum,
     Float,
@@ -37,6 +38,7 @@ class Invoice(base):
     contact_alias = Column(String(40), nullable=False)
     amount = Column(Float(return_scale=2))
     sales_tax = Column(Integer, server_default='19')
+    gwg = Column(Boolean, server_default='FALSE', nullable=False)
     afa = Column(Integer)
     date = Column(Date, nullable=False)
     invoice_type = Column(Enum(InvoiceTypes))
