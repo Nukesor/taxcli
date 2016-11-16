@@ -27,7 +27,8 @@ class InvoiceTypes(enum.Enum):
 class Invoice(base):
     __tablename__ = 'invoices'
     __table_args__ = (
-        ForeignKeyConstraint(['contact_alias'], ['contacts.alias']),
+        ForeignKeyConstraint(['contact_alias'], ['contacts.alias'],
+                             deferrable=True, initially='DEFERRED'),
         PrimaryKeyConstraint('invoice_number', 'contact_alias'),
         CheckConstraint('invoice_file is null and invoice_file_type is null or '
                         'invoice_file is not null and invoice_file_type is not null'),

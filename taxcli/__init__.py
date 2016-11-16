@@ -1,9 +1,13 @@
 import sys
 import argparse
+from os import getenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from taxcli.config import config
 
-engine = create_engine("postgresql://localhost/taxcli")
+CONFIG = config[getenv('TAXCLI_CONFIG', 'default')]
+
+engine = create_engine(CONFIG.sql_uri)
 base = declarative_base(bind=engine)
 
 import taxcli.models  # noqa
