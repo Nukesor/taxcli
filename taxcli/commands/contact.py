@@ -12,7 +12,6 @@ def get_contact_data():
     addressline3 = None
     city = None
     zip_or_postcode = None
-    state_province_county = None
     country = None
 
     while not alias:
@@ -41,9 +40,6 @@ def get_contact_data():
     while not zip_or_postcode:
         zip_or_postcode = input('zip or postcode:')
 
-    state_province_county = input("State province county:")
-    state_province_county = None if state_province_county == '' else state_province_county
-
     while not country:
         country = input("country:")
 
@@ -52,7 +48,6 @@ def get_contact_data():
 
     new_contact.addressline2 = addressline2
     new_contact.addressline3 = addressline3
-    new_contact.state_province_county = state_province_county
 
     session.add(new_contact)
     session.commit()

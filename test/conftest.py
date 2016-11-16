@@ -73,7 +73,6 @@ def contact_factory(session):
                 addressline2=None,
                 addressline3=None,
                 city='Hamburg', zip_or_post='22627',
-                state_province_county=None,
                 country='Deutschland'):
             """Return an Invoice."""
             contact = Contact(alias, name, addressline1, city, zip_or_post, country)

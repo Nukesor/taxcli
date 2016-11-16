@@ -1,7 +1,7 @@
 from sqlalchemy import extract
-from terminaltables import AsciiTable
 from taxcli.models import Invoice
 from taxcli.helper.postgres import get_session
+from taxcli.helper.output import print_invoices
 from taxcli.helper.calculation import (
     calculate_afa,
     calculate_amount,
@@ -99,14 +99,3 @@ def get_year(args):
     print('Overall sales tax to be refunded: {0:.2f}'.format(refund_tax))
     print('Overall sales tax to be pay: {0:.2f}'.format(received_tax))
     print('Overall refunds from AfA: {0:.2f}'.format(afa))
-
-
-def print_invoices(invoices):
-    invoice_data = [['Contact', 'Number', 'Amount', 'Sales tax', 'AfA', 'Date']]
-    for invoice in invoices:
-        invoice_data.append([
-            invoice.contact_alias, invoice.invoice_number, invoice.amount,
-            invoice.sales_tax, invoice.afa, invoice.date.isoformat()])
-    invoice_table = AsciiTable(invoice_data)
-    invoice_table.outer_border = False
-    print(invoice_table.table)

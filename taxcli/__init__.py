@@ -12,7 +12,7 @@ base = declarative_base(bind=engine)
 
 import taxcli.models  # noqa
 
-from taxcli.commands import add
+from taxcli.commands import add, delete, lists
 from taxcli.commands.analysis import get_month, get_year
 
 
@@ -38,9 +38,31 @@ def main():
     )
     add_subcommand.set_defaults(func=add)
 
+    # Delete
+    delete_types = ['transaction', 'invoice', 'contact']
+    delete_subcommand = subparsers.add_parser(
+        'delete', help='Add data to the database')
+    delete_subcommand.add_argument(
+        'type', type=str, choices=delete_types,
+        help='The kind of data you want to add.'
+    )
+    delete_subcommand.set_defaults(func=delete)
+
+    # List
+    list_types = ['transaction', 'invoice', 'contact']
+    list_subcommand = subparsers.add_parser(
+        'list', help='Add data to the database')
+    list_subcommand.add_argument(
+        'type', type=str, choices=list_types,
+        help='The kind of data you want to add.'
+    )
+    list_subcommand.set_defaults(func=lists)
+
+    # Analysis part
     get_parser = subparsers.add_parser(
         'get', help='Get analysis of data.')
 
+    # Analysis for month
     get_subparser = get_parser.add_subparsers(
         title='`get` subcommands', description='Subcommands for getting analysis')
     month_subcommand = get_subparser.add_parser(
@@ -51,6 +73,7 @@ def main():
         'month', type=int, help='The month you want to look at.')
     month_subcommand.set_defaults(func=get_month)
 
+    # Analysis for years
     year_subcommand = get_subparser.add_parser(
         'year', help='Get analysis of data for one year.')
     year_subcommand.add_argument(

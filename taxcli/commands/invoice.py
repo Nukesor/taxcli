@@ -2,6 +2,7 @@ import os
 import sys
 from datetime import datetime
 from taxcli.models import Contact, Invoice
+from taxcli.helper.output import print_invoices
 from taxcli.helper.postgres import get_session
 
 
@@ -88,15 +89,16 @@ def get_invoice_data(args):
         if sales_tax not in [0, 7, 19]:
             print("Sales tax has to be 7 or 19 percent")
 
-    while afa is None:
-        afa = input("Time window for afa (years):")
-        if afa != '':
-            try:
-                afa = int(afa)
-            except:
-                print("Enter a valid number or nothing")
-                afa = None
-    afa = None if afa == '' else afa
+    if invoice_type == 'expense':
+        while afa is None:
+            afa = input("Time window for afa (years):")
+            if afa != '':
+                try:
+                    afa = int(afa)
+                except:
+                    print("Enter a valid number or nothing")
+                    afa = None
+        afa = None if afa == '' else afa
 
     new_invoice = Invoice(invoice_number, alias, amount, date,
                           sales_tax=sales_tax, afa=afa, invoice_type=invoice_type,
@@ -104,3 +106,136 @@ def get_invoice_data(args):
 
     session.add(new_invoice)
     session.commit()
+
+
+def delete_invoice_data(args):
+    session = get_session()
+
+    alias = None
+    invoice_number = None
+
+    while not alias:
+        alias = input('Alias for this invoice ("help" for a list):')
+        if alias == 'help':
+            contacts = session.query(Contact).all()
+            for contact in contacts:
+                print(contact.alias)
+            alias = None
+        else:
+            exists = session.query(Contact).get(alias)
+            if not exists:
+                print("Alias doesn't exists.")
+                alias = None
+
+    while not invoice_number:
+        invoice_number = input('Invoice number for this alias("help" for a list):')
+        if invoice_number == 'help':
+            invoices = session.query(Invoice) \
+                .filter(Invoice.contact_alias == alias) \
+                .all()
+            for invoice in invoices:
+                print(invoice.invoice_number)
+            invoice_number = None
+        else:
+            invoice = session.query(Invoice) \
+                .filter(Invoice.contact_alias == alias) \
+                .filter(Invoice.invoice_number == invoice_number) \
+                .one_or_none()
+            if not invoice:
+                print("Alias doesn't exists.")
+                alias = None
+
+    session.delete(invoice)
+    session.commit()
+
+
+def delete_invoice_data(args):
+    session = get_session()
+
+    alias = None
+    invoice_number = None
+
+    while not alias:
+        alias = input('Alias for this invoice ("help" for a list):')
+        if alias == 'help':
+            contacts = session.query(Contact).all()
+            for contact in contacts:
+                print(contact.alias)
+            alias = None
+        else:
+            exists = session.query(Contact).get(alias)
+            if not exists:
+                print("Alias doesn't exists.")
+                alias = None
+
+    while not invoice_number:
+        invoice_number = input('Invoice number for this alias("help" for a list):')
+        if invoice_number == 'help':
+            invoices = session.query(Invoice) \
+                .filter(Invoice.contact_alias == alias) \
+                .all()
+            for invoice in invoices:
+                print(invoice.invoice_number)
+            invoice_number = None
+        else:
+            invoice = session.query(Invoice) \
+                .filter(Invoice.contact_alias == alias) \
+                .filter(Invoice.invoice_number == invoice_number) \
+                .one_or_none()
+            if not invoice:
+                print("Alias doesn't exists.")
+                alias = None
+
+    session.delete(invoice)
+    session.commit()
+
+
+def list_invoice_data(args):
+    session = get_session()
+
+    alias = None
+    invoice_number = None
+
+    while not alias:
+        alias = input('Alias for the invoices ("help" for a list):')
+        if alias == 'help':
+            contacts = session.query(Contact).all()
+            for contact in contacts:
+                print(contact.alias)
+            alias = None
+        else:
+            exists = session.query(Contact).get(alias)
+            if not exists:
+                print("Alias doesn't exists.")
+                alias = None
+
+    done = False
+    while not done:
+        invoice_number = input('Invoice number for this alias \n'
+                               '("help" for a list, leave empty for all):')
+        if invoice_number == 'help':
+            invoices = session.query(Invoice) \
+                .filter(Invoice.contact_alias == alias) \
+                .all()
+            for invoice in invoices:
+                print(invoice.invoice_number)
+            invoice_number = None
+        else:
+            if invoice_number:
+                invoices = session.query(Invoice) \
+                    .filter(Invoice.contact_alias == alias) \
+                    .filter(Invoice.invoice_number == invoice_number) \
+                    .one_or_none()
+            else:
+                invoices = session.query(Invoice) \
+                    .filter(Invoice.contact_alias == alias) \
+                    .all()
+            if not invoices:
+                if invoice_number:
+                    print("No such invoice_number.")
+                else:
+                    print("No invoices for this alias.")
+                    done = False
+            else:
+                done = True
+    print_invoices(invoices)

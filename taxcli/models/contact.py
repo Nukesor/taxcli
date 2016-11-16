@@ -19,7 +19,6 @@ class Contact(base):
     addressline3 = Column(String(60))
     city = Column(String(60), nullable=False)
     zip_or_postcode = Column(String(10), nullable=False)
-    state_province_county = Column(String(60))
     country = Column(String(60), nullable=False)
 
     def __init__(self, alias, name, addressline1, city, zip_or_postcode, country):
