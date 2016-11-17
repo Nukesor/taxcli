@@ -1,3 +1,7 @@
+from sqlalchemy import extract
+from taxcli.models import Invoice
+
+
 def calculate_afa(invoices, year):
     afa = 0
     for invoice in invoices:
@@ -35,3 +39,18 @@ def calculate_tax(invoices):
         if invoice.sales_tax:
             tax += invoice.amount * (invoice.sales_tax/100)
     return tax
+
+
+def calculate_pool(session, year):
+    # Tax pool invoices
+    pool_invoices = session.query(Invoice) \
+        .filter(extract('year', Invoice.date) >= year-5) \
+        .filter(extract('year', Invoice.date) <= year) \
+        .filter(Invoice.invoice_type == 'expense') \
+        .filter(Invoice.gwg == False) \
+        .filter(Invoice.afa == None) \
+        .order_by(Invoice.date.asc()) \
+        .all()
+
+    amount = calculate_netto_amount(pool_invoices)
+    return amount/5

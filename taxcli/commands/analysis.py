@@ -6,6 +6,7 @@ from taxcli.helper.invoice_files import get_invoice_files
 from taxcli.helper.calculation import (
     calculate_afa,
     calculate_netto_amount,
+    calculate_pool,
     calculate_tax,
 )
 
@@ -48,7 +49,7 @@ def get_month(args):
     print('\n\n')
     print('Overall income'.format(income_amount))
     print('Overall sales tax to be refunded: {0:.2f}'.format(refund_tax))
-    print('Overall sales tax to be pay: {0:.2f}'.format(received_tax))
+    print('Overall sales tax to be payed: {0:.2f}'.format(received_tax))
 
 
 def get_year(args):
@@ -77,13 +78,13 @@ def get_year(args):
         .filter(extract('year', Invoice.date) == year) \
         .filter(Invoice.invoice_type == 'expense') \
         .filter(Invoice.gwg == False) \
-        .filter(Invoice.afa == False) \
+        .filter(Invoice.afa == None) \
         .order_by(Invoice.date.asc()) \
         .all()
 
     # Ust.VA + overall expense calculation
-    refund_tax = calculate_tax(pool_invoices)
-    expense_amount = calculate_netto_amount(pool_invoices)
+    refund_tax += calculate_tax(pool_invoices)
+    pool_amount = calculate_pool(session, 2016)
     get_invoice_files(pool_invoices)
 
     print('GwG:')
@@ -97,6 +98,7 @@ def get_year(args):
         .order_by(Invoice.date.asc()) \
         .all()
 
+    refund_tax += calculate_tax(afa_invoices)
     afa = calculate_afa(afa_invoices, year)
     get_invoice_files(afa_invoices)
 
@@ -120,6 +122,7 @@ def get_year(args):
     print('\n\n')
     print('Overall income: {0:.2f}'.format(income_amount))
     print('Overall expense: {0:.2f}'.format(expense_amount))
+    print('Pool costs: {0:.2f}\n'.format(pool_amount))
 
     print('Overall sales tax to be refunded: {0:.2f}'.format(refund_tax))
     print('Overall sales tax to be pay: {0:.2f}'.format(received_tax))
