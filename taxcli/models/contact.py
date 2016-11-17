@@ -14,12 +14,12 @@ class Contact(base):
 
     alias = Column(String(40), primary_key=True)
     name = Column(String(100), nullable=False)
-    addressline1 = Column(String(60), nullable=False)
+    addressline1 = Column(String(60))
     addressline2 = Column(String(60))
     addressline3 = Column(String(60))
-    city = Column(String(60), nullable=False)
-    zip_or_postcode = Column(String(10), nullable=False)
-    country = Column(String(60), nullable=False)
+    city = Column(String(60))
+    zip_or_postcode = Column(String(10))
+    country = Column(String(60))
 
     def __init__(self, alias, name, addressline1, city, zip_or_postcode, country):
         self.alias = alias

@@ -56,19 +56,38 @@ def get_year(args):
 
     session = get_session()
 
-    expenses = session.query(Invoice) \
+    # GwG invoices
+    gwg_invoices = session.query(Invoice) \
         .filter(extract('year', Invoice.date) == year) \
         .filter(Invoice.invoice_type == 'expense') \
+        .filter(Invoice.gwg == True) \
         .order_by(Invoice.date.asc()) \
         .all()
 
     # Ust.VA + overall expense calculation
-    refund_tax = calculate_tax(expenses)
-    expense_amount = calculate_netto_amount(expenses)
-    get_invoice_files(expenses)
+    refund_tax = calculate_tax(gwg_invoices)
+    expense_amount = calculate_netto_amount(gwg_invoices)
+    get_invoice_files(gwg_invoices)
 
-    print('Expenses:')
-    print_invoices(expenses)
+    print('GwG:')
+    print_invoices(gwg_invoices)
+
+    # Tax pool invoices
+    pool_invoices = session.query(Invoice) \
+        .filter(extract('year', Invoice.date) == year) \
+        .filter(Invoice.invoice_type == 'expense') \
+        .filter(Invoice.gwg == False) \
+        .filter(Invoice.afa == False) \
+        .order_by(Invoice.date.asc()) \
+        .all()
+
+    # Ust.VA + overall expense calculation
+    refund_tax = calculate_tax(pool_invoices)
+    expense_amount = calculate_netto_amount(pool_invoices)
+    get_invoice_files(pool_invoices)
+
+    print('GwG:')
+    print_invoices(pool_invoices)
 
     # AfA calculation
     afa_invoices = session.query(Invoice) \
@@ -81,7 +100,7 @@ def get_year(args):
     afa = calculate_afa(afa_invoices, year)
     get_invoice_files(afa_invoices)
 
-    print('\nAfA invoices:')
+    print('\nAfA:')
     print_invoices(afa_invoices)
 
     # Income and Ust. VA income calculation

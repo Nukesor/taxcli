@@ -32,6 +32,9 @@ class Invoice(base):
         PrimaryKeyConstraint('invoice_number', 'contact_alias'),
         CheckConstraint('invoice_file is null and invoice_file_type is null or '
                         'invoice_file is not null and invoice_file_type is not null'),
+        CheckConstraint('afa is not null and gwg is false or '
+                        'afa is null and gwg is true or '
+                        'afa is null and gwg is false')
     )
 
     invoice_number = Column(String(100), nullable=False)
@@ -46,7 +49,8 @@ class Invoice(base):
     invoice_file_type = Column(String(10))
 
     def __init__(self, invoice_number, contact_alias, amount, date,
-                 sales_tax=19, afa=None, invoice_type='expense',
+                 sales_tax=19, afa=None,
+                 gwg=gwg, invoice_type='expense',
                  invoice_file=None, invoice_extension=None):
         self.invoice_number = invoice_number
         self.contact_alias = contact_alias

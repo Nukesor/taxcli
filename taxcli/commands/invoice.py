@@ -28,7 +28,6 @@ def get_invoice_data(args):
     invoice_type = None
     date = None
     sales_tax = None
-    afa = None
 
     while not alias:
         alias = input('Alias for this invoice ("help" for a list):')
@@ -54,14 +53,6 @@ def get_invoice_data(args):
     if exists:
         print("There already is an invoice with this number for this contact. Aborting")
         sys.exit(1)
-
-    while not amount:
-        amount = input("Money amount:")
-        try:
-            amount = float(amount)
-        except:
-            print("Not a Number.")
-            amount = None
 
     while not date:
         date = input("Date ('YYYY-MM-DD'):")
@@ -89,19 +80,47 @@ def get_invoice_data(args):
         if sales_tax not in [0, 7, 19]:
             print("Sales tax has to be 7 or 19 percent")
 
+    while not amount:
+        amount = input("Money amount:")
+        try:
+            amount = float(amount)
+        except:
+            print("Not a Number.")
+            amount = None
+
+    afa = None
+    gwg = None
     if invoice_type == 'expense':
-        while afa is None:
-            afa = input("Time window for afa (years):")
-            if afa != '':
-                try:
-                    afa = int(afa)
-                except:
-                    print("Enter a valid number or nothing")
-                    afa = None
-        afa = None if afa == '' else afa
+        netto = amount - amount*sales_tax/100
+        if netto > 1000:
+            while afa is None:
+                afa = input("Time window for afa (years):")
+                if afa != '':
+                    try:
+                        afa = int(afa)
+                    except:
+                        print("Enter a valid number or nothing")
+                        afa = None
+            afa = None if afa == '' else afa
+        elif netto > 150:
+            pass
+        else:
+            while gwg is None:
+                gwg = input("Is this a gwg [true]:")
+                if gwg == 'false':
+                    gwg = False
+                elif gwg == 'true':
+                    gwg = True
+                elif gwg == '':
+                    gwg = None
+                    break
+                else:
+                    gwg = None
+                    print('Invalid [true, false]')
 
     new_invoice = Invoice(invoice_number, alias, amount, date,
-                          sales_tax=sales_tax, afa=afa, invoice_type=invoice_type,
+                          sales_tax=sales_tax, afa=afa,
+                          gwg=gwg, invoice_type=invoice_type,
                           invoice_file=invoice_file, invoice_extension=invoice_file_type)
 
     session.add(new_invoice)

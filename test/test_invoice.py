@@ -17,6 +17,7 @@ class TestInvoiceAnalysis:
         assert invoice.amount == 5000
         assert invoice.sales_tax == 19
         assert invoice.afa is None
+        assert invoice.gwg is None
         assert invoice.invoice_type == InvoiceTypes.expense
         assert invoice.date.day == 5
         assert invoice.date.month == 3
@@ -33,7 +34,7 @@ class TestInvoiceAnalysis:
 
         invoice_factory.get(invoice_number='2016-2', contact_alias='test',
                             amount='10000', date='2016-05-05',
-                            sales_tax=7, afa=0, invoice_type='income',
+                            sales_tax=7, invoice_type='income',
                             invoice_file=invoice_file, invoice_extension=invoice_file_type)
         invoice = session.query(Invoice) \
             .filter(Invoice.contact_alias == 'test') \
@@ -43,6 +44,7 @@ class TestInvoiceAnalysis:
         assert invoice.amount == 10000
         assert invoice.sales_tax == 7
         assert invoice.afa == 0
+        assert invoice.gwg is None
         assert invoice.invoice_type == InvoiceTypes.income
         assert invoice.date.day == 5
         assert invoice.date.month == 5
