@@ -87,7 +87,7 @@ def get_year(args):
     pool_amount = calculate_pool(session, 2016)
     get_invoice_files(pool_invoices)
 
-    print('GwG:')
+    print('\nPool invoices:')
     print_invoices(pool_invoices)
 
     # AfA calculation

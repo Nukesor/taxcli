@@ -112,7 +112,7 @@ def get_invoice_data(args):
                 elif gwg == 'true':
                     gwg = True
                 elif gwg == '':
-                    gwg = None
+                    gwg = True
                     break
                 else:
                     gwg = None
