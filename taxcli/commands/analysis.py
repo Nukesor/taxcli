@@ -47,7 +47,7 @@ def get_month(args):
     print_invoices(incomes)
 
     print('\n\n')
-    print('Overall income'.format(income_amount))
+    print('Overall income: {}'.format(income_amount))
     print('Overall sales tax to be refunded: {0:.2f}'.format(refund_tax))
     print('Overall sales tax to be payed: {0:.2f}'.format(received_tax))
 
