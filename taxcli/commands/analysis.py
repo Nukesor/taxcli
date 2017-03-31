@@ -6,6 +6,7 @@ from taxcli.helper.invoice_files import get_invoice_files
 from taxcli.helper.calculation import (
     calculate_afa,
     calculate_netto_amount,
+    calculate_brutto_amount,
     calculate_pool,
     calculate_tax,
 )
@@ -133,12 +134,19 @@ def get_year(args):
     income_amount = calculate_netto_amount(incomes)
     get_invoice_files(incomes)
 
+    # Total expenses this year
+    all_expense_invoices = session.query(Invoice) \
+        .filter(extract('year', Invoice.date) == year) \
+        .filter(Invoice.invoice_type == 'expense') \
+        .all()  # NOQA
+    total_expense_amount = calculate_brutto_amount(all_expense_invoices)
+
     print('\nIncomes:')
     print_invoices(incomes)
 
     print('\n\n')
     print('Overall income: {0:.2f}'.format(income_amount))
-    print('Overall expense: {0:.2f}'.format(expense_amount))
+    print('Overall expense: {0:.2f}'.format(total_expense_amount))
 
     print('\nExpense refunds: {0:.2f}'.format(expense_amount))
     print('Gwg refunds: {0:.2f}'.format(gwg_amount))

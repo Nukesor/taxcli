@@ -33,6 +33,13 @@ def calculate_netto_amount(invoices):
     return amount
 
 
+def calculate_brutto_amount(invoices):
+    amount = 0
+    for invoice in invoices:
+        amount += invoice.amount
+    return amount
+
+
 def calculate_tax(invoices):
     tax = 0
     for invoice in invoices:
