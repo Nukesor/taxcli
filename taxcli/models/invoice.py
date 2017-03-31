@@ -32,9 +32,11 @@ class Invoice(base):
         PrimaryKeyConstraint('invoice_number', 'contact_alias'),
         CheckConstraint('invoice_file is null and invoice_file_type is null or '
                         'invoice_file is not null and invoice_file_type is not null'),
-        CheckConstraint('afa is not null and gwg is false or '
-                        'afa is null and gwg is true or '
-                        'afa is null and gwg is false')
+        CheckConstraint(
+            "pooling is TRUE and gwg is FALSE and afa is NULL or "
+            "pooling is FALSE and afa is not NULL and gwg is FALSE or "
+            "pooling is FALSE and afa is NULL and gwg is TRUE or "
+            'pooling is FALSE and afa is NULL and gwg is FALSE')
     )
 
     invoice_number = Column(String(100), nullable=False)

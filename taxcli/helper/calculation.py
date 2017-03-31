@@ -44,12 +44,12 @@ def calculate_tax(invoices):
 def calculate_pool(session, year):
     # Tax pool invoices
     pool_invoices = session.query(Invoice) \
-        .filter(extract('year', Invoice.date) >= year-5) \
+        .filter(extract('year', Invoice.date) >= year-4) \
         .filter(extract('year', Invoice.date) <= year) \
         .filter(Invoice.invoice_type == 'expense') \
         .filter(Invoice.pooling == True) \
         .order_by(Invoice.date.asc()) \
-        .all()
+        .all()  # NOQA
 
     amount = calculate_netto_amount(pool_invoices)
     return amount/5
