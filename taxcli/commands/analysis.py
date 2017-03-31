@@ -146,4 +146,4 @@ def get_year(args):
     print('Afa refunds: {0:.2f}'.format(afa_amount))
 
     print('\nOverall sales tax to be refunded: {0:.2f}'.format(refund_tax))
-    print('Overall sales tax to be pay: {0:.2f}'.format(received_tax))
+    print('Overall sales tax to pay: {0:.2f}'.format(received_tax))
