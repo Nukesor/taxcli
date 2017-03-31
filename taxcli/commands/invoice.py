@@ -1,7 +1,7 @@
 import os
 import sys
 from datetime import datetime
-from taxcli.models import Contact, Invoice
+from taxcli.models import Contact, Invoice, InvoiceTypes
 from taxcli.helper.output import print_invoices
 from taxcli.helper.postgres import get_session
 
@@ -9,6 +9,7 @@ from taxcli.helper.postgres import get_session
 def get_invoice_data(args):
     session = get_session()
 
+    # Get file from arguments
     if args['file']:
         if not os.path.isfile(args['file']):
             print('Invalid file or file path')
@@ -17,19 +18,16 @@ def get_invoice_data(args):
         with open(invoice_path, "rb") as file_descriptor:
             _, extension = os.path.splitext(invoice_path)
             invoice_file = file_descriptor.read()
-            invoice_file_type = extension[1:]
+            extension = extension[1:]
     else:
         invoice_file = None
-        invoice_file_type = None
+        extension = None
 
-    alias = None
-    invoice_number = None
-    amount = None
-    invoice_type = None
-    date = None
-    sales_tax = None
+    # New Invoice
+    new_invoice = Invoice(invoice_file=invoice_file, invoice_extension=extension)
 
-    while not alias:
+    # Get an contact alias of an already existing contact
+    while True:
         alias = input('Alias for this invoice ("help" for a list):')
         if alias == 'help':
             contacts = session.query(Contact).all()
@@ -41,9 +39,16 @@ def get_invoice_data(args):
             if not exists:
                 print("Alias doesn't exists.")
                 alias = None
+            else:
+                new_invoice.contact_alias = alias
+                break
 
-    while not invoice_number:
+    # Get a invoice number
+    while True:
         invoice_number = input('Invoice number:')
+        if invoice_number:
+            new_invoice.invoice_number = invoice_number
+            break
 
     # Check if we already have an invoice with this number for this contact
     exists = session.query(Invoice) \
@@ -54,77 +59,104 @@ def get_invoice_data(args):
         print("There already is an invoice with this number for this contact. Aborting")
         sys.exit(1)
 
-    while not date:
+    # Get a date
+    while True:
         date = input("Date ('YYYY-MM-DD'):")
         try:
             date = datetime.strptime(date, "%Y-%m-%d").date()
         except:
             print('Invalid date format')
             date = None
+        else:
+            new_invoice.date = date
+            break
 
-    while not invoice_type:
-        invoice_type = input("Invoice type (income or expense)[expense]:")
+    # Get invoice type
+    while True:
+        invoice_type = input("Invoice type (income or expense)[default: expense]:")
         invoice_type = 'expense' if invoice_type == '' else invoice_type
         if invoice_type not in ['income', 'expense']:
             print('Invalid invoice type')
             invoice_type = None
+        else:
+            if invoice_type == 'expense':
+                new_invoice.invoice_type = InvoiceTypes.expense
+                break
+            else:
+                new_invoice.invoice_type = InvoiceTypes.income
+                break
 
-    while sales_tax is None:
-        sales_tax = input("Sales tax [19]:")
+    # Get sales tax
+    while True:
+        sales_tax = input("Sales tax [default: 19]:")
         sales_tax = 19 if sales_tax == '' else sales_tax
         try:
             sales_tax = int(sales_tax)
         except:
             print("Enter a valid number")
             sales_tax = None
-        if sales_tax not in [0, 7, 19]:
-            print("Sales tax has to be 7 or 19 percent")
+        else:
+            if sales_tax not in [0, 7, 19]:
+                print("Sales tax has to be 7 or 19 percent")
+            else:
+                new_invoice.sales_tax = sales_tax
+                break
 
-    while not amount:
-        amount = input("Money amount:")
+    # Get amount
+    while True:
+        amount = input("Amount:")
         try:
             amount = float(amount)
         except:
             print("Not a Number.")
             amount = None
+        else:
+            new_invoice.amount = amount
+            break
 
-    afa = None
-    gwg = None
-    pooling = False
     if invoice_type == 'expense':
         netto = amount - amount*sales_tax/100
-        if netto > 1000:
-            while afa is None:
-                afa = input("Time window for AfA (years, empty if not AfA):")
-                if afa != '':
+        while True:
+            acquisition_invoice = input("Acquisition invoice [true, false]:")
+            if acquisition_invoice.lower() == 'false':
+                acquisition_invoice = False
+                break
+            elif acquisition_invoice.lower() == 'true':
+                acquisition_invoice = True
+                break
+            else:
+                print("Invalid input: 'true' or 'false'")
+
+        if acquisition_invoice:
+            # The amount is higher than 1000, thereby it has to be an AfA
+            if netto > 1000:
+                while True:
+                    afa = input("Time window for AfA (years):")
                     try:
                         afa = int(afa)
                     except:
                         print("Enter a valid number or nothing")
                         afa = None
-            if afa == '':
-                afa = None
-                pooling = True
-        elif netto > 150:
-            pass
-        else:
-            while gwg is None:
-                gwg = input("Is this a gwg [true]:")
-                if gwg == 'false':
-                    gwg = False
-                elif gwg == 'true':
-                    gwg = True
-                elif gwg == '':
-                    gwg = True
-                    break
-                else:
-                    gwg = None
-                    print('Invalid [true, false]')
+                    else:
+                        new_invoice.afa = afa
+                        break
 
-    new_invoice = Invoice(invoice_number, alias, amount, date,
-                          sales_tax=sales_tax, afa=afa, pooling=pooling,
-                          gwg=gwg, invoice_type=invoice_type,
-                          invoice_file=invoice_file, invoice_extension=invoice_file_type)
+            # The amount is higher than 1000, thereby it has to be an AfA
+            elif netto > 150:
+                new_invoice.pooling = True
+            # The amount is lower than 150. Thereby we need to check manually
+            # if this is supposed to be a GwG or if this should go into pooling.
+            else:
+                while True:
+                    gwg = input("Is this a GwG [true, false]:")
+                    if gwg.lower() == 'false':
+                        new_invoice.pooling = True
+                        break
+                    elif gwg.lower() == 'true':
+                        new_invoice.gwg = True
+                        break
+                    else:
+                        print("Invalid input: 'true' or 'false'")
 
     session.add(new_invoice)
     session.commit()

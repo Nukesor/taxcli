@@ -51,9 +51,10 @@ class Invoice(base):
     invoice_file = Column(LargeBinary)
     invoice_file_type = Column(String(10))
 
-    def __init__(self, invoice_number, contact_alias, amount, date,
+    def __init__(self, invoice_number=None, contact_alias=None,
+                 amount=None, date=None,
                  sales_tax=19, afa=None, pooling=False,
-                 gwg=gwg, invoice_type='expense',
+                 gwg=False, invoice_type='expense',
                  invoice_file=None, invoice_extension=None):
         self.invoice_number = invoice_number
         self.contact_alias = contact_alias
