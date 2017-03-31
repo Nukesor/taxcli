@@ -47,8 +47,7 @@ def calculate_pool(session, year):
         .filter(extract('year', Invoice.date) >= year-5) \
         .filter(extract('year', Invoice.date) <= year) \
         .filter(Invoice.invoice_type == 'expense') \
-        .filter(Invoice.gwg == False) \
-        .filter(Invoice.afa == None) \
+        .filter(Invoice.pooling == True) \
         .order_by(Invoice.date.asc()) \
         .all()
 

@@ -43,13 +43,14 @@ class Invoice(base):
     sales_tax = Column(Integer, server_default='19')
     gwg = Column(Boolean, server_default='FALSE', nullable=False)
     afa = Column(Integer)
+    pooling = Column(Boolean, server_default='FALSE', nullable=False)
     date = Column(Date, nullable=False)
     invoice_type = Column(Enum(InvoiceTypes))
     invoice_file = Column(LargeBinary)
     invoice_file_type = Column(String(10))
 
     def __init__(self, invoice_number, contact_alias, amount, date,
-                 sales_tax=19, afa=None,
+                 sales_tax=19, afa=None, pooling=False,
                  gwg=gwg, invoice_type='expense',
                  invoice_file=None, invoice_extension=None):
         self.invoice_number = invoice_number
@@ -58,6 +59,7 @@ class Invoice(base):
         self.date = date
         self.sales_tax = sales_tax
         self.afa = afa
+        self.pooling = pooling
         if invoice_type == 'expense':
             self.invoice_type = InvoiceTypes.expense
         else:

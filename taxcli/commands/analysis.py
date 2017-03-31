@@ -57,30 +57,47 @@ def get_year(args):
 
     session = get_session()
 
+    # Regular expenses
+    expense_invoices = session.query(Invoice) \
+        .filter(extract('year', Invoice.date) == year) \
+        .filter(Invoice.invoice_type == 'expense') \
+        .filter(Invoice.gwg == False) \
+        .filter(Invoice.afa == None) \
+        .filter(Invoice.pooling == False) \
+        .order_by(Invoice.date.asc()) \
+        .all()  # NOQA
+
+    # Ust.VA + overall expense calculation
+    refund_tax = calculate_tax(expense_invoices)
+    expense_amount = calculate_netto_amount(expense_invoices)
+    get_invoice_files(expense_invoices)
+
+    print('Expenses (Services of other companies):')
+    print_invoices(expense_invoices)
+
     # GwG invoices
     gwg_invoices = session.query(Invoice) \
         .filter(extract('year', Invoice.date) == year) \
         .filter(Invoice.invoice_type == 'expense') \
         .filter(Invoice.gwg == True) \
         .order_by(Invoice.date.asc()) \
-        .all()
+        .all()  # NOQA
 
     # Ust.VA + overall expense calculation
     refund_tax = calculate_tax(gwg_invoices)
-    expense_amount = calculate_netto_amount(gwg_invoices)
+    gwg_amount = calculate_netto_amount(gwg_invoices)
     get_invoice_files(gwg_invoices)
 
-    print('GwG:')
+    print('\nGwG:')
     print_invoices(gwg_invoices)
 
     # Tax pool invoices
     pool_invoices = session.query(Invoice) \
         .filter(extract('year', Invoice.date) == year) \
         .filter(Invoice.invoice_type == 'expense') \
-        .filter(Invoice.gwg == False) \
-        .filter(Invoice.afa == None) \
+        .filter(Invoice.pooling == True) \
         .order_by(Invoice.date.asc()) \
-        .all()
+        .all()  # NOQA
 
     # Ust.VA + overall expense calculation
     refund_tax += calculate_tax(pool_invoices)
@@ -96,10 +113,10 @@ def get_year(args):
         .filter(Invoice.invoice_type == 'expense') \
         .filter(extract('year', Invoice.date) >= (year-Invoice.afa)) \
         .order_by(Invoice.date.asc()) \
-        .all()
+        .all()  # NOQA
 
     refund_tax += calculate_tax(afa_invoices)
-    afa = calculate_afa(afa_invoices, year)
+    afa_amount = calculate_afa(afa_invoices, year)
     get_invoice_files(afa_invoices)
 
     print('\nAfA:')
@@ -122,8 +139,11 @@ def get_year(args):
     print('\n\n')
     print('Overall income: {0:.2f}'.format(income_amount))
     print('Overall expense: {0:.2f}'.format(expense_amount))
-    print('Pool costs: {0:.2f}\n'.format(pool_amount))
 
-    print('Overall sales tax to be refunded: {0:.2f}'.format(refund_tax))
+    print('\nExpense refunds: {0:.2f}'.format(expense_amount))
+    print('Gwg refunds: {0:.2f}'.format(gwg_amount))
+    print('Pool refunds: {0:.2f}'.format(pool_amount))
+    print('Afa refunds: {0:.2f}'.format(afa_amount))
+
+    print('\nOverall sales tax to be refunded: {0:.2f}'.format(refund_tax))
     print('Overall sales tax to be pay: {0:.2f}'.format(received_tax))
-    print('Overall refunds from AfA: {0:.2f}'.format(afa))

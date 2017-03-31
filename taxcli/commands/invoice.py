@@ -90,18 +90,21 @@ def get_invoice_data(args):
 
     afa = None
     gwg = None
+    pooling = False
     if invoice_type == 'expense':
         netto = amount - amount*sales_tax/100
         if netto > 1000:
             while afa is None:
-                afa = input("Time window for afa (years):")
+                afa = input("Time window for AfA (years, empty if not AfA):")
                 if afa != '':
                     try:
                         afa = int(afa)
                     except:
                         print("Enter a valid number or nothing")
                         afa = None
-            afa = None if afa == '' else afa
+            if afa == '':
+                afa = None
+                pooling = True
         elif netto > 150:
             pass
         else:
@@ -119,7 +122,7 @@ def get_invoice_data(args):
                     print('Invalid [true, false]')
 
     new_invoice = Invoice(invoice_number, alias, amount, date,
-                          sales_tax=sales_tax, afa=afa,
+                          sales_tax=sales_tax, afa=afa, pooling=pooling,
                           gwg=gwg, invoice_type=invoice_type,
                           invoice_file=invoice_file, invoice_extension=invoice_file_type)
 
