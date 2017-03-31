@@ -197,9 +197,9 @@ def list_invoice_data(args):
         if invoice_number == 'help':
             invoices = session.query(Invoice) \
                 .filter(Invoice.contact_alias == alias) \
+                .order_by(Invoice.date.desc()) \
                 .all()
-            for invoice in invoices:
-                print(invoice.invoice_number)
+            print_invoices(invoices)
             invoice_number = None
         else:
             if invoice_number:
@@ -256,9 +256,9 @@ def add_invoice_file(args):
         if invoice_number == 'help':
             invoices = session.query(Invoice) \
                 .filter(Invoice.contact_alias == alias) \
+                .order_by(Invoice.date.desc()) \
                 .all()
-            for invoice in invoices:
-                print(invoice.invoice_number)
+            print_invoices(invoices)
             invoice_number = None
         else:
             invoice = session.query(Invoice) \
