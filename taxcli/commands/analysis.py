@@ -84,7 +84,7 @@ def get_year(args):
         .all()  # NOQA
 
     # Ust.VA + overall expense calculation
-    refund_tax = calculate_tax(gwg_invoices)
+    refund_tax += calculate_tax(gwg_invoices)
     gwg_amount = calculate_netto_amount(gwg_invoices)
     get_invoice_files(gwg_invoices)
 
